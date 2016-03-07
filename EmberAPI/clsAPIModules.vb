@@ -638,6 +638,19 @@ Public Class ModulesManager
         logger.Trace("[ModulesManager] [LoadModules] [Done]")
     End Sub
 
+    Function QueryAnyGenericIsBusy() As Boolean
+        While Not ModulesLoaded
+            Application.DoEvents()
+        End While
+
+        Dim modules As IEnumerable(Of _externalGenericModuleClass) = externalGenericModules.Where(Function(e) e.ProcessorModule.IsBusy)
+        If modules.Count() > 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
     Function QueryScraperCapabilities_Image_Movie(ByVal externalScraperModule As _externalScraperModuleClass_Image_Movie, ByVal ScrapeModifiers As Structures.ScrapeModifiers) As Boolean
         While Not ModulesLoaded
             Application.DoEvents()
@@ -964,18 +977,19 @@ Public Class ModulesManager
                     If ret.breakChain Then Exit For
                 Next
 
-                If ScrapedList.Count = 0 Then
-                    logger.Trace(String.Format("[ModulesManager] [ScrapeData_Movie] [Cancelled] [No Scraper Results] {0}", DBElement.Filename))
-                    Return True 'Cancelled
-                End If
-
                 'Merge scraperresults considering global datascraper settings
                 DBElement = NFO.MergeDataScraperResults_Movie(DBElement, ScrapedList, ScrapeType, ScrapeOptions)
 
                 'create cache paths for Actor Thumbs
                 DBElement.Movie.CreateCachePaths_ActorsThumbs()
             End If
-            logger.Trace(String.Format("[ModulesManager] [ScrapeData_Movie] [Done] {0}", DBElement.Filename))
+
+            If ScrapedList.Count > 0 Then
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_Movie] [Done] {0}", DBElement.Filename))
+            Else
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_Movie] [Done] [No Scraper Results] {0}", DBElement.Filename))
+                Return True 'TODO: need a new trigger
+            End If
             Return ret.Cancelled
         Else
             logger.Trace(String.Format("[ModulesManager] [ScrapeData_Movie] [Abort] [Offline] {0}", DBElement.Filename))
@@ -1035,15 +1049,16 @@ Public Class ModulesManager
                 If ret.breakChain Then Exit For
             Next
 
-            If ScrapedList.Count = 0 Then
-                logger.Trace(String.Format("[ModulesManager] [ScrapeData_MovieSet] [Cancelled] [No Scraper Results] {0}", DBElement.MovieSet.Title))
-                Return True 'Cancelled
-            End If
-
             'Merge scraperresults considering global datascraper settings
             DBElement = NFO.MergeDataScraperResults_MovieSet(DBElement, ScrapedList, ScrapeType, ScrapeOptions)
         End If
-        logger.Trace(String.Format("[ModulesManager] [ScrapeData_MovieSet] [Done] {0}", DBElement.MovieSet.Title))
+
+        If ScrapedList.Count > 0 Then
+            logger.Trace(String.Format("[ModulesManager] [ScrapeData_MovieSet] [Done] {0}", DBElement.MovieSet.Title))
+        Else
+            logger.Trace(String.Format("[ModulesManager] [ScrapeData_MovieSet] [Done] [No Scraper Results] {0}", DBElement.MovieSet.Title))
+            Return True 'TODO: need a new trigger
+        End If
         Return ret.Cancelled
         'Else
         'Return True 'Cancelled
@@ -1082,19 +1097,22 @@ Public Class ModulesManager
                     If ret.breakChain Then Exit For
                 Next
 
-                If ScrapedList.Count = 0 Then
-                    logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVEpisode] [Cancelled] [No Scraper Results] {0}", DBElement.Filename))
-                    Return True 'Cancelled
-                End If
-
                 'Merge scraperresults considering global datascraper settings
                 DBElement = NFO.MergeDataScraperResults_TVEpisode_Single(DBElement, ScrapedList, ScrapeOptions)
 
                 'create cache paths for Actor Thumbs
                 DBElement.TVEpisode.CreateCachePaths_ActorsThumbs()
             End If
+
+            If ScrapedList.Count > 0 Then
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVEpisode] [Done] {0}", DBElement.Filename))
+            Else
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVEpisode] [Done] [No Scraper Results] {0}", DBElement.Filename))
+                Return True 'TODO: need a new trigger
+            End If
             Return ret.Cancelled
         Else
+            logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVEpisode] [Abort] [Offline] {0}", DBElement.Filename))
             Return True 'Cancelled
         End If
     End Function
@@ -1131,16 +1149,19 @@ Public Class ModulesManager
                     If ret.breakChain Then Exit For
                 Next
 
-                If ScrapedList.Count = 0 Then
-                    logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVSeason] [Cancelled] [No Scraper Results] {0}: Season {1}", DBElement.TVShow.Title, DBElement.TVSeason.Season))
-                    Return True 'Cancelled
-                End If
-
                 'Merge scraperresults considering global datascraper settings
                 DBElement = NFO.MergeDataScraperResults_TVSeason(DBElement, ScrapedList, ScrapeOptions)
             End If
+
+            If ScrapedList.Count > 0 Then
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVSeason] [Done] {0}: Season {1}", DBElement.TVShow.Title, DBElement.TVSeason.Season))
+            Else
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVSeason] [Done] [No Scraper Results] {0}: Season {1}", DBElement.TVShow.Title, DBElement.TVSeason.Season))
+                Return True 'TODO: need a new trigger
+            End If
             Return ret.Cancelled
         Else
+            logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVSeason] [Abort] [Offline] {0}: Season {1}", DBElement.TVShow.Title, DBElement.TVSeason.Season))
             Return True 'Cancelled
         End If
     End Function
@@ -1206,11 +1227,6 @@ Public Class ModulesManager
                     If ret.breakChain Then Exit For
                 Next
 
-                If ScrapedList.Count = 0 Then
-                    logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVShow] [Cancelled] [No Scraper Results] {0}", DBElement.TVShow.Title))
-                    Return True 'Cancelled
-                End If
-
                 'Merge scraperresults considering global datascraper settings
                 DBElement = NFO.MergeDataScraperResults_TV(DBElement, ScrapedList, ScrapeType, ScrapeOptions, ScrapeModifiers.withEpisodes)
 
@@ -1222,8 +1238,16 @@ Public Class ModulesManager
                     Next
                 End If
             End If
+
+            If ScrapedList.Count > 0 Then
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVShow] [Done] {0}", DBElement.TVShow.Title))
+            Else
+                logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVShow] [Done] [No Scraper Results] {0}", DBElement.TVShow.Title))
+                Return True 'TODO: need a new trigger
+            End If
             Return ret.Cancelled
         Else
+            logger.Trace(String.Format("[ModulesManager] [ScrapeData_TVShow] [Abort] [Offline] {0}", DBElement.TVShow.Title))
             Return True 'Cancelled
         End If
     End Function
@@ -1275,8 +1299,10 @@ Public Class ModulesManager
                 ImagesContainer.CreateCachePaths(DBElement)
             End If
 
+            logger.Trace(String.Format("[ModulesManager] [ScrapeImage_Movie] [Done] {0}", DBElement.Filename))
             Return ret.Cancelled
         Else
+            logger.Trace(String.Format("[ModulesManager] [ScrapeImage_Movie] [Abort] [Offline] {0}", DBElement.Filename))
             Return True 'Cancelled
         End If
     End Function
@@ -1327,6 +1353,7 @@ Public Class ModulesManager
             ImagesContainer.CreateCachePaths(DBElement)
         End If
 
+        logger.Trace(String.Format("[ModulesManager] [ScrapeImage_MovieSet] [Done] {0}", DBElement.MovieSet.Title))
         Return ret.Cancelled
     End Function
     ''' <summary>
@@ -1414,8 +1441,10 @@ Public Class ModulesManager
                 ImagesContainer.CreateCachePaths(DBElement)
             End If
 
+            logger.Trace(String.Format("[ModulesManager] [ScrapeImage_TV] [Done] {0}", DBElement.TVShow.Title))
             Return ret.Cancelled
         Else
+            logger.Trace(String.Format("[ModulesManager] [ScrapeImage_Movie] [Abort] [Offline] {0}", DBElement.Filename))
             Return True 'Cancelled
         End If
     End Function
@@ -1454,6 +1483,7 @@ Public Class ModulesManager
                 If ret.breakChain Then Exit For
             Next
         End If
+        logger.Trace(String.Format("[ModulesManager] [ScrapeTheme_Movie] [Done] {0}", DBElement.Filename))
         Return ret.Cancelled
     End Function
     ''' <summary>
@@ -1489,6 +1519,7 @@ Public Class ModulesManager
                 If ret.breakChain Then Exit For
             Next
         End If
+        logger.Trace(String.Format("[ModulesManager] [ScrapeTrailer_Movie] [Done] {0}", DBElement.Filename))
         Return ret.Cancelled
     End Function
 

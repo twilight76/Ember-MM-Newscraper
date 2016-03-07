@@ -1,22 +1,22 @@
-﻿'################################################################################
-'#                             EMBER MEDIA MANAGER                              #
-'################################################################################
-'################################################################################
-'# This file is part of Ember Media Manager.                                    #
-'#                                                                              #
-'# Ember Media Manager is free software: you can redistribute it and/or modify  #
-'# it under the terms of the GNU General Public License as published by         #
-'# the Free Software Foundation, either version 3 of the License, or            #
-'# (at your option) any later version.                                          #
-'#                                                                              #
-'# Ember Media Manager is distributed in the hope that it will be useful,       #
-'# but WITHOUT ANY WARRANTY; without even the implied warranty of               #
-'# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                #
-'# GNU General Public License for more details.                                 #
-'#                                                                              #
-'# You should have received a copy of the GNU General Public License            #
-'# along with Ember Media Manager.  If not, see <http://www.gnu.org/licenses/>. #
-'################################################################################
+﻿' ################################################################################
+' #                             EMBER MEDIA MANAGER                              #
+' ################################################################################
+' ################################################################################
+' # This file is part of Ember Media Manager.                                    #
+' #                                                                              #
+' # Ember Media Manager is free software: you can redistribute it and/or modify  #
+' # it under the terms of the GNU General Public License as published by         #
+' # the Free Software Foundation, either version 3 of the License, or            #
+' # (at your option) any later version.                                          #
+' #                                                                              #
+' # Ember Media Manager is distributed in the hope that it will be useful,       #
+' # but WITHOUT ANY WARRANTY; without even the implied warranty of               #
+' # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                #
+' # GNU General Public License for more details.                                 #
+' #                                                                              #
+' # You should have received a copy of the GNU General Public License            #
+' # along with Ember Media Manager.  If not, see <http://www.gnu.org/licenses/>. #
+' ################################################################################
 
 Imports System.IO
 Imports System.Text.RegularExpressions
@@ -803,7 +803,7 @@ Public Class Scanner
                         MediaInfo.UpdateTVMediaInfo(cEpisode)
                     End If
                 Else
-                    If isNew AndAlso cEpisode.TVShow.TVDBSpecified AndAlso cEpisode.ShowIDSpecified Then
+                    If isNew AndAlso cEpisode.TVShow.AnyUniqueIDSpecified AndAlso cEpisode.ShowIDSpecified Then
                         If String.IsNullOrEmpty(cEpisode.TVEpisode.Aired) Then cEpisode.TVEpisode.Aired = sEpisode.Aired
                         If Not ModulesManager.Instance.ScrapeData_TVEpisode(cEpisode, Master.DefaultOptions_TV, False) Then
                             If Not String.IsNullOrEmpty(cEpisode.TVEpisode.Title) Then
@@ -826,7 +826,7 @@ Public Class Scanner
                         MediaInfo.UpdateTVMediaInfo(cEpisode)
                     End If
                 Else
-                    If isNew AndAlso cEpisode.TVShow.TVDBSpecified AndAlso cEpisode.ShowIDSpecified Then
+                    If isNew AndAlso cEpisode.TVShow.AnyUniqueIDSpecified AndAlso cEpisode.ShowIDSpecified Then
                         If cEpisode.TVEpisode.Season = -1 Then cEpisode.TVEpisode.Season = sEpisode.Season
                         If cEpisode.TVEpisode.Episode = -1 Then cEpisode.TVEpisode.Episode = sEpisode.Episode
                         If Not ModulesManager.Instance.ScrapeData_TVEpisode(cEpisode, Master.DefaultOptions_TV, False) Then
@@ -846,7 +846,7 @@ Public Class Scanner
             End If
 
             'Scrape episode images
-            If isNew AndAlso cEpisode.TVShow.TVDBSpecified AndAlso cEpisode.ShowIDSpecified Then
+            If isNew AndAlso cEpisode.TVShow.AnyUniqueIDSpecified AndAlso cEpisode.ShowIDSpecified Then
                 Dim SearchResultsContainer As New MediaContainers.SearchResultsContainer
                 Dim ScrapeModifiers As New Structures.ScrapeModifiers
                 If Not cEpisode.ImagesContainer.Fanart.LocalFilePathSpecified AndAlso Master.eSettings.TVEpisodeFanartAnyEnabled Then ScrapeModifiers.EpisodeFanart = True
@@ -1039,21 +1039,25 @@ Public Class Scanner
                                     tmpSeason.TVSeason.TVDB = nfoSeason.TVDB
                                 Else
                                     'Scrape season info
-                                    ModulesManager.Instance.ScrapeData_TVSeason(tmpSeason, Master.DefaultOptions_TV, False)
+                                    If isNew AndAlso tmpSeason.TVShow.AnyUniqueIDSpecified AndAlso tmpSeason.ShowIDSpecified Then
+                                        ModulesManager.Instance.ScrapeData_TVSeason(tmpSeason, Master.DefaultOptions_TV, False)
+                                    End If
                                 End If
 
                                 GetTVSeasonFolderContents(tmpSeason)
 
                                 'Scrape season images
-                                Dim SearchResultsContainer As New MediaContainers.SearchResultsContainer
-                                Dim ScrapeModifiers As New Structures.ScrapeModifiers
-                                If Not tmpSeason.ImagesContainer.Banner.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonBannerAnyEnabled Then ScrapeModifiers.SeasonBanner = True
-                                If Not tmpSeason.ImagesContainer.Fanart.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonFanartAnyEnabled Then ScrapeModifiers.SeasonFanart = True
-                                If Not tmpSeason.ImagesContainer.Landscape.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonLandscapeAnyEnabled Then ScrapeModifiers.SeasonLandscape = True
-                                If Not tmpSeason.ImagesContainer.Poster.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonPosterAnyEnabled Then ScrapeModifiers.SeasonPoster = True
-                                If ScrapeModifiers.SeasonBanner OrElse ScrapeModifiers.SeasonFanart OrElse ScrapeModifiers.SeasonLandscape OrElse ScrapeModifiers.SeasonPoster Then
-                                    If Not ModulesManager.Instance.ScrapeImage_TV(tmpSeason, SearchResultsContainer, ScrapeModifiers, False) Then
-                                        Images.SetPreferredImages(tmpSeason, SearchResultsContainer, ScrapeModifiers)
+                                If isNew AndAlso tmpSeason.TVShow.AnyUniqueIDSpecified AndAlso tmpSeason.ShowIDSpecified Then
+                                    Dim SearchResultsContainer As New MediaContainers.SearchResultsContainer
+                                    Dim ScrapeModifiers As New Structures.ScrapeModifiers
+                                    If Not tmpSeason.ImagesContainer.Banner.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonBannerAnyEnabled Then ScrapeModifiers.SeasonBanner = True
+                                    If Not tmpSeason.ImagesContainer.Fanart.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonFanartAnyEnabled Then ScrapeModifiers.SeasonFanart = True
+                                    If Not tmpSeason.ImagesContainer.Landscape.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonLandscapeAnyEnabled Then ScrapeModifiers.SeasonLandscape = True
+                                    If Not tmpSeason.ImagesContainer.Poster.LocalFilePathSpecified AndAlso Master.eSettings.TVSeasonPosterAnyEnabled Then ScrapeModifiers.SeasonPoster = True
+                                    If ScrapeModifiers.SeasonBanner OrElse ScrapeModifiers.SeasonFanart OrElse ScrapeModifiers.SeasonLandscape OrElse ScrapeModifiers.SeasonPoster Then
+                                        If Not ModulesManager.Instance.ScrapeImage_TV(tmpSeason, SearchResultsContainer, ScrapeModifiers, False) Then
+                                            Images.SetPreferredImages(tmpSeason, SearchResultsContainer, ScrapeModifiers)
+                                        End If
                                     End If
                                 End If
 
@@ -1082,7 +1086,7 @@ Public Class Scanner
             'save all new seasons to DB
             For Each newSeason As Integer In newSeasonsIndex
                 Dim tSeason As Database.DBElement = DBTVShow.Seasons.FirstOrDefault(Function(f) f.TVSeason.Season = newSeason)
-                If tSeason.TVSeason IsNot Nothing Then
+                If tSeason IsNot Nothing AndAlso tSeason.TVSeason IsNot Nothing Then
                     Master.DB.SaveTVSeasonToDB(tSeason, Batchmode, True)
                 End If
             Next
@@ -1329,7 +1333,7 @@ Public Class Scanner
                 Else
                     Dim HasFile As Boolean = False
                     Dim tList As IOrderedEnumerable(Of FileInfo) = lFi.Where(Function(f) Master.eSettings.FileSystemValidExts.Contains(f.Extension.ToLower) AndAlso
-                             Not Regex.IsMatch(f.Name, "[^\w\s]\s?(trailer|sample)", RegexOptions.IgnoreCase) AndAlso ((Master.eSettings.MovieSkipStackedSizeCheck AndAlso
+                             Not Regex.IsMatch(f.Name, String.Concat("[^\w\s]\s?(", clsAdvancedSettings.GetSetting("NotValidFileContains", "trailer|sample"), ")"), RegexOptions.IgnoreCase) AndAlso ((Master.eSettings.MovieSkipStackedSizeCheck AndAlso
                             StringUtils.IsStacked(f.Name)) OrElse (Not Convert.ToInt32(Master.eSettings.MovieSkipLessThan) > 0 OrElse f.Length >= Master.eSettings.MovieSkipLessThan * 1048576))).OrderBy(Function(f) f.FullName)
 
                     If tList.Count > 1 AndAlso sSource.IsSingle Then
@@ -1389,11 +1393,11 @@ Public Class Scanner
 
         For Each lFile As FileInfo In di.GetFiles.OrderBy(Function(s) s.Name)
             If Not TVEpisodePaths.Contains(lFile.FullName.ToLower) AndAlso Master.eSettings.FileSystemValidExts.Contains(lFile.Extension.ToLower) AndAlso
-                Not Regex.IsMatch(lFile.Name, "[^\w\s]\s?(trailer|sample)", RegexOptions.IgnoreCase) AndAlso
+                Not Regex.IsMatch(lFile.Name, String.Concat("[^\w\s]\s?(", clsAdvancedSettings.GetSetting("NotValidFileContains", "trailer|sample"), ")"), RegexOptions.IgnoreCase) AndAlso
                 (Not Convert.ToInt32(Master.eSettings.TVSkipLessThan) > 0 OrElse lFile.Length >= Master.eSettings.TVSkipLessThan * 1048576) Then
                 tShow.Episodes.Add(New Database.DBElement(Enums.ContentType.TVEpisode) With {.Filename = lFile.FullName, .TVEpisode = New MediaContainers.EpisodeDetails})
-            ElseIf Regex.IsMatch(lFile.Name, "[^\w\s]\s?(trailer|sample)", RegexOptions.IgnoreCase) AndAlso Master.eSettings.FileSystemValidExts.Contains(lFile.Extension.ToLower) Then
-                logger.Info(String.Format("VideoInfoScanner: file {0} has been ignored (trailer or sample file)", lFile.FullName))
+            ElseIf Regex.IsMatch(lFile.Name, String.Concat("[^\w\s]\s?(", clsAdvancedSettings.GetSetting("NotValidFileContains", "trailer|sample"), ")"), RegexOptions.IgnoreCase) AndAlso Master.eSettings.FileSystemValidExts.Contains(lFile.Extension.ToLower) Then
+                logger.Info(String.Format("[Sanner] [ScanForTVFiles] file {0} has been ignored (ignore list)", lFile.FullName))
             End If
         Next
 

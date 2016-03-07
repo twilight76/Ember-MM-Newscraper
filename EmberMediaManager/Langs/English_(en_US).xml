@@ -25,7 +25,7 @@
   <string id="24">Lock</string>
   <string id="25">Edit Movie</string>
   <string id="26">Details</string>
-  <string id="27">&gt;&gt; Select Genre &lt;&lt;</string>
+  <string id="27">Select Genre</string>
   <string id="28">Add</string>
   <string id="29">Set</string>
   <string id="30">Remove</string>
@@ -96,7 +96,7 @@
   <string id="95">Display only marked movies.</string>
   <string id="96">Display only locked movies.</string>
   <string id="97">Display only movies from the selected source.</string>
-  <string id="98">Select Genre...</string>
+  <string id="98">Search -/+ 1 year if no search result was found</string>
   <string id="99">Canceling All Processes...</string>
   <string id="100">Actor</string>
   <string id="101">Are you sure you want to continue?</string>
@@ -1110,7 +1110,7 @@
   <string id="1018">Season Landscape</string>
   <string id="1019">Season {0} Banner</string>
   <string id="1020">Season {0} Landscape</string>
-  <string id="1021"></string>
+  <string id="1021">Select Tag</string>
   <string id="1022"></string>
   <string id="1023"></string>
   <string id="1024"></string>
@@ -1572,4 +1572,13 @@
   <string id="1481">Select Expor tPath</string>
   <string id="1482">Select VLC Path</string>
   <string id="1483">libvlc.dll not found in path</string>
+  <string id="1484">Remove following plays from watched history?</string>
+  <string id="1485">Start cleaning movie history</string>
+  <string id="1486">This will remove all plays in your watched movie history which were played on a specific time (i.e. 00:00:00)</string>
+  <string id="1487">This will remove all plays in your watched movie history which were registered in a specific timespan (i.e. 3 plays for one movie within 5 minutes, will delete the 2 last plays)</string>
+  <string id="1488">Timespan [minutes]</string>
+  <string id="1489">Timestamp [hh:mm:ss]</string>
+  <string id="1490">Cleaning</string>
+  <string id="1491">Delete history from a specific date</string>
+  <string id="1492">Delete history for a particular timespan</string>
 </strings>
